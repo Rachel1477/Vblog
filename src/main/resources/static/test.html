@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前后端连接测试</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>前后端连接测试页面</h1>
+        
+        <div class="test-section">
+            <h3>GET 请求测试</h3>
+            <button onclick="testGet()">测试 GET 请求</button>
+        </div>
+
+        <div class="test-section">
+            <h3>POST 请求测试</h3>
+            <button onclick="testPost()">测试 POST 请求</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+
+        function testGet() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在发送 GET 请求...';
+            resultDiv.className = '';
+
+            axios.get(API_BASE_URL + '/test')
+                .then(function (response) {
+                    resultDiv.innerHTML = 'GET 请求成功！\n\n响应数据：\n' + JSON.stringify(response.data, null, 2);
+                    resultDiv.className = 'success';
+                })
+                .catch(function (error) {
+                    resultDiv.innerHTML = 'GET 请求失败！\n\n错误信息：\n' + (error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
+                    resultDiv.className = 'error';
+                });
+        }
+
+        function testPost() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在发送 POST 请求...';
+            resultDiv.className = '';
+
+            const testData = {
+                message: '这是来自前端的测试数据',
+                timestamp: new Date().toISOString()
+            };
+
+            axios.post(API_BASE_URL + '/test', testData)
+                .then(function (response) {
+                    resultDiv.innerHTML = 'POST 请求成功！\n\n响应数据：\n' + JSON.stringify(response.data, null, 2);
+                    resultDiv.className = 'success';
+                })
+                .catch(function (error) {
+                    resultDiv.innerHTML = 'POST 请求失败！\n\n错误信息：\n' + (error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
+                    resultDiv.className = 'error';
+                });
+        }
+    </script>
+</body>
+</html>
+

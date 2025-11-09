@@ -1,0 +1,25 @@
+-- 创建 vblog 数据库
+CREATE DATABASE IF NOT EXISTS vblog DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+USE vblog;
+
+-- 用户表
+CREATE TABLE IF NOT EXISTS `user` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+    `username` VARCHAR(50) NOT NULL COMMENT '用户名',
+    `password` VARCHAR(64) NOT NULL COMMENT '密码（SHA-256加密）',
+    `email` VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
+    `nickname` VARCHAR(50) DEFAULT NULL COMMENT '昵称',
+    `avatar` VARCHAR(255) DEFAULT NULL COMMENT '头像URL',
+    `status` TINYINT DEFAULT 1 COMMENT '状态：0-禁用，1-正常',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_username` (`username`),
+    UNIQUE KEY `uk_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
+
+-- 插入测试用户（密码：123456，SHA-256加密后的值）
+INSERT INTO `user` (`username`, `password`, `email`, `nickname`, `status`) 
+VALUES ('admin', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'admin@example.com', '管理员', 1);
+
