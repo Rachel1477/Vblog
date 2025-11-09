@@ -122,6 +122,43 @@ public class JwtUtil {
     }
 
     /**
+     * 获取 Token 签发时间（登录时间）
+     */
+    public Date getIssuedAtFromToken(String token) {
+        return getClaimsFromToken(token).getIssuedAt();
+    }
+
+    /**
+     * 获取 Token 签发时间戳（毫秒）
+     */
+    public Long getIssuedAtTimestamp(String token) {
+        Date issuedAt = getIssuedAtFromToken(token);
+        return issuedAt != null ? issuedAt.getTime() : null;
+    }
+
+    /**
+     * 解析 Token，获取完整信息
+     * 包括：用户ID(uid)、用户名、签发时间、过期时间
+     * 
+     * @param token JWT Token
+     * @return TokenInfo 对象
+     */
+    public org.example.dto.TokenInfo parseToken(String token) {
+        try {
+            Claims claims = getClaimsFromToken(token);
+            
+            Long uid = claims.get("userId", Long.class);
+            String username = claims.getSubject();
+            Date issuedAt = claims.getIssuedAt();
+            Date expiresAt = claims.getExpiration();
+            
+            return new org.example.dto.TokenInfo(uid, username, issuedAt, expiresAt);
+        } catch (Exception e) {
+            throw new RuntimeException("Token 解析失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * 刷新 Token（生成新的 Token）
      */
     public String refreshToken(String token) {

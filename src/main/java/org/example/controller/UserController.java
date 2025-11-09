@@ -208,6 +208,28 @@ public class UserController {
     }
 
     /**
+     * 解析 Token 获取用户信息
+     * 返回：uid（用户ID）、username、登录时间、时间戳
+     */
+    @PostMapping("/parse-token")
+    @RequireAuth
+    public Result<org.example.dto.TokenInfo> parseToken(HttpServletRequest request) {
+        try {
+            String token = getTokenFromRequest(request);
+            if (token == null) {
+                return Result.error("Token 不存在");
+            }
+            
+            // 解析 Token 获取完整信息
+            org.example.dto.TokenInfo tokenInfo = jwtUtil.parseToken(token);
+            
+            return Result.success("Token 解析成功", tokenInfo);
+        } catch (Exception e) {
+            return Result.error("Token 解析失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * 从请求头中获取 Token
      */
     private String getTokenFromRequest(HttpServletRequest request) {
