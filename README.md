@@ -377,7 +377,7 @@ docker exec -it my-redis redis-cli ping
 
 ## 后续开发计划
 
-- [ ] 笔记 CRUD 功能
+- ~~[ ] 笔记 CRUD 功能~~
 - [ ] 笔记分类和标签
 - [ ] 笔记搜索功能
 - [ ] 文件上传（图片、附件）
