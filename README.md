@@ -392,7 +392,7 @@ docker exec -it my-redis redis-cli ping
 
 ## 文档
 
-- [API 接口文档](API文档.md)
+- [API 接口文档](API目录.md)
 - [JWT 认证文档](JWT文档.md)
 
 ## 许可证
