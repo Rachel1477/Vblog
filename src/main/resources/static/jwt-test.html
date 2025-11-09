@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT 身份验证测试</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .status-value {
+            color: #333;
+            font-family: monospace;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+
+        .status-indicator.online {
+            background: #28a745;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        button.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-height: 80px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        #result.show {
+            display: block;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 JWT 身份验证测试系统</h1>
+        
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span class="status-label">状态:</span>
+                <span class="status-value" id="statusText">未登录</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">用户:</span>
+                <span class="status-value" id="currentUser">-</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Token:</span>
+                <span class="status-value" id="tokenPreview">-</span>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('auth')">认证管理</button>
+            <button class="tab" onclick="switchTab('protected')">受保护的接口</button>
+            <button class="tab" onclick="switchTab('guest')">游客接口</button>
+        </div>
+
+        <!-- 认证管理 -->
+        <div id="auth-tab" class="tab-content active">
+            <h3 style="margin-bottom: 15px;">登录</h3>
+            <form onsubmit="login(event)">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="login-username" value="admin" required>
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="login-password" value="123456" required>
+                    </div>
+                </div>
+                <button type="submit">登录并获取 Token</button>
+            </form>
+
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+
+            <h3 style="margin-bottom: 15px;">Token 管理</h3>
+            <div class="action-buttons">
+                <button class="secondary" onclick="checkToken()">检查 Token 状态</button>
+                <button class="success" onclick="refreshToken()">刷新 Token</button>
+                <button class="secondary" onclick="logout()">登出</button>
+                <button class="success" onclick="getCurrentUser()">获取当前用户</button>
+            </div>
+        </div>
+
+        <!-- 受保护的接口 -->
+        <div id="protected-tab" class="tab-content">
+            <h3 style="margin-bottom: 15px;">修改密码（需要 Token）</h3>
+            <form onsubmit="changePassword(event)">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="change-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>旧密码</label>
+                        <input type="password" id="change-old-password" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>新密码</label>
+                    <input type="password" id="change-new-password" required>
+                </div>
+                <button type="submit">修改密码</button>
+            </form>
+
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+
+            <h3 style="margin-bottom: 15px;">其他测试</h3>
+            <div class="action-buttons">
+                <button onclick="testProtectedWithToken()">带 Token 访问</button>
+                <button class="secondary" onclick="testProtectedWithoutToken()">不带 Token 访问</button>
+                <button class="success" onclick="testProtectedWithExpiredToken()">过期 Token 访问</button>
+            </div>
+        </div>
+
+        <!-- 游客接口 -->
+        <div id="guest-tab" class="tab-content">
+            <h3 style="margin-bottom: 15px;">注册新用户（游客可访问）</h3>
+            <form onsubmit="register(event)">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>用户名 *</label>
+                        <input type="text" id="register-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>昵称</label>
+                        <input type="text" id="register-nickname">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="register-email">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>密码 *</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>确认密码 *</label>
+                        <input type="password" id="register-password-confirm" required>
+                    </div>
+                </div>
+                <button type="submit">注册</button>
+            </form>
+
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+
+            <h3 style="margin-bottom: 15px;">查询用户（游客可访问）</h3>
+            <form onsubmit="queryUser(event)">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="query-username" value="admin">
+                </div>
+                <button type="submit" class="success">查询用户信息</button>
+            </form>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api/user';
+        let authToken = localStorage.getItem('jwt_token') || null;
+
+        // 页面加载时检查 Token 状态
+        window.onload = function() {
+            updateStatus();
+        };
+
+        // 配置 axios 自动添加 Token
+        axios.interceptors.request.use(
+            config => {
+                if (authToken) {
+                    config.headers['Authorization'] = 'Bearer ' + authToken;
+                }
+                return config;
+            },
+            error => {
+                return Promise.reject(error);
+            }
+        );
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+            document.getElementById('result').className = '';
+            document.getElementById('result').innerHTML = '';
+        }
+
+        function showResult(success, message, data = null) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'show ' + (success ? 'success' : 'error');
+            let content = (success ? '✅ 成功\n\n' : '❌ 失败\n\n') + message + '\n\n';
+            if (data) {
+                content += '响应数据：\n' + JSON.stringify(data, null, 2);
+            }
+            resultDiv.textContent = content;
+        }
+
+        function updateStatus() {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const currentUser = document.getElementById('currentUser');
+            const tokenPreview = document.getElementById('tokenPreview');
+
+            if (authToken) {
+                indicator.classList.add('online');
+                statusText.textContent = '已登录';
+                // 从 token 中解析用户名（简单显示，实际应该调用接口）
+                try {
+                    const payload = JSON.parse(atob(authToken.split('.')[1]));
+                    currentUser.textContent = payload.username || '-';
+                } catch (e) {
+                    currentUser.textContent = '-';
+                }
+                tokenPreview.textContent = authToken.substring(0, 20) + '...';
+            } else {
+                indicator.classList.remove('online');
+                statusText.textContent = '未登录（游客模式）';
+                currentUser.textContent = '-';
+                tokenPreview.textContent = '-';
+            }
+        }
+
+        function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            showResult(true, '正在登录...');
+
+            axios.post(API_BASE_URL + '/login', { username, password })
+                .then(response => {
+                    authToken = response.data.data.token;
+                    localStorage.setItem('jwt_token', authToken);
+                    updateStatus();
+                    showResult(true, '登录成功！Token 已保存', response.data);
+                })
+                .catch(error => {
+                    showResult(false, '登录失败：' + (error.response?.data?.message || error.message), error.response?.data);
+                });
+        }
+
+        function logout() {
+            if (!authToken) {
+                showResult(false, '当前未登录');
+                return;
+            }
+
+            axios.post(API_BASE_URL + '/logout')
+                .then(response => {
+                    authToken = null;
+                    localStorage.removeItem('jwt_token');
+                    updateStatus();
+                    showResult(true, '登出成功！Token 已失效', response.data);
+                })
+                .catch(error => {
+                    showResult(false, '登出失败：' + (error.response?.data?.message || error.message), error.response?.data);
+                });
+        }
+
+        function checkToken() {
+            if (!authToken) {
+                showResult(false, '当前未登录，无 Token');
+                return;
+            }
+
+            axios.get(API_BASE_URL + '/check-token')
+                .then(response => {
+                    showResult(true, 'Token 有效！', response.data);
+                })
+                .catch(error => {
+                    authToken = null;
+                    localStorage.removeItem('jwt_token');
+                    updateStatus();
+                    showResult(false, 'Token 无效：' + (error.response?.data?.message || error.message), error.response?.data);
+                });
+        }
+
+        function refreshToken() {
+            if (!authToken) {
+                showResult(false, '当前未登录');
+                return;
+            }
+
+            axios.post(API_BASE_URL + '/refresh-token')
+                .then(response => {
+                    authToken = response.data.data.token;
+                    localStorage.setItem('jwt_token', authToken);
+                    updateStatus();
+                    showResult(true, 'Token 刷新成功！', response.data);
+                })
+                .catch(error => {
+                    showResult(false, 'Token 刷新失败：' + (error.response?.data?.message || error.message), error.response?.data);
+                });
+        }
+
+        function getCurrentUser() {
+            if (!authToken) {
+                showResult(false, '当前未登录');
+                return;
+            }
+
+            axios.get(API_BASE_URL + '/current')
+                .then(response => {
+                    showResult(true, '获取当前用户成功！', response.data);
+                })
+                .catch(error => {
+                    showResult(false, '获取失败：' + (error.response?.data?.message || error.message), error.response?.data);
+                });
+        }
+
+        function changePassword(event) {
+            event.preventDefault();
+            const username = document.getElementById('change-username').value;
+            const oldPassword = document.getElementById('change-old-password').value;
+            const newPassword = document.getElementById('change-new-password').value;
+
+            axios.post(API_BASE_URL + '/change-password', { username, oldPassword, newPassword })
+                .then(response => {
+                    authToken = null;
+                    localStorage.removeItem('jwt_token');
+                    updateStatus();
+                    showResult(true, '密码修改成功！Token 已失效，请重新登录', response.data);
+                    event.target.reset();
+                })
+                .catch(error => {
+                    showResult(false, '修改失败：' + (error.response?.data?.message || error.message), error.response?.data);
+                });
+        }
+
+        function register(event) {
+            event.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const passwordConfirm = document.getElementById('register-password-confirm').value;
+            const email = document.getElementById('register-email').value;
+            const nickname = document.getElementById('register-nickname').value;
+
+            if (password !== passwordConfirm) {
+                showResult(false, '两次输入的密码不一致！');
+                return;
+            }
+
+            axios.post(API_BASE_URL + '/register', { username, password, email, nickname })
+                .then(response => {
+                    showResult(true, '注册成功！现在可以登录了', response.data);
+                    event.target.reset();
+                })
+                .catch(error => {
+                    showResult(false, '注册失败：' + (error.response?.data?.message || error.message), error.response?.data);
+                });
+        }
+
+        function queryUser(event) {
+            event.preventDefault();
+            const username = document.getElementById('query-username').value;
+
+            axios.get(API_BASE_URL + '/' + username)
+                .then(response => {
+                    showResult(true, '查询成功！（游客可访问）', response.data);
+                })
+                .catch(error => {
+                    showResult(false, '查询失败：' + (error.response?.data?.message || error.message), error.response?.data);
+                });
+        }
+
+        function testProtectedWithToken() {
+            getCurrentUser();
+        }
+
+        function testProtectedWithoutToken() {
+            const tempToken = authToken;
+            authToken = null;
+            axios.get(API_BASE_URL + '/current')
+                .then(response => {
+                    showResult(true, '意外成功（不应该发生）', response.data);
+                })
+                .catch(error => {
+                    showResult(true, '正确拦截：需要认证才能访问', error.response?.data);
+                })
+                .finally(() => {
+                    authToken = tempToken;
+                });
+        }
+
+        function testProtectedWithExpiredToken() {
+            const tempToken = authToken;
+            authToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoidGVzdCIsImV4cCI6MTYwMDAwMDAwMH0.invalid';
+            axios.get(API_BASE_URL + '/current')
+                .then(response => {
+                    showResult(true, '意外成功（不应该发生）', response.data);
+                })
+                .catch(error => {
+                    showResult(true, '正确拦截：Token 无效或已过期', error.response?.data);
+                })
+                .finally(() => {
+                    authToken = tempToken;
+                });
+        }
+    </script>
+</body>
+</html>
+
