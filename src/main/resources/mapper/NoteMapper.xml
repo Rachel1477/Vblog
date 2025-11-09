@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mapper.NoteMapper">
+
+    <resultMap id="BaseResultMap" type="org.example.entity.Note">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="status" property="status"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, title, content, status, view_count, create_time, update_time
+    </sql>
+
+    <!-- 插入笔记 -->
+    <insert id="insert" parameterType="org.example.entity.Note" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO note (user_id, title, content, status, view_count)
+        VALUES (#{userId}, #{title}, #{content}, #{status}, 0)
+    </insert>
+
+    <!-- 根据ID查询笔记 -->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM note
+        WHERE id = #{id}
+    </select>
+
+    <!-- 更新笔记 -->
+    <update id="update" parameterType="org.example.entity.Note">
+        UPDATE note
+        SET title = #{title},
+            content = #{content},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除笔记 -->
+    <delete id="deleteById">
+        DELETE FROM note WHERE id = #{id}
+    </delete>
+
+    <!-- 查询用户的所有笔记 -->
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM note
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 查询所有公开的笔记 -->
+    <select id="findPublicNotes" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM note
+        WHERE status = 1
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 统计用户笔记数量 -->
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM note WHERE user_id = #{userId}
+    </select>
+
+    <!-- 增加浏览次数 -->
+    <update id="increaseViewCount">
+        UPDATE note SET view_count = view_count + 1 WHERE id = #{id}
+    </update>
+
+</mapper>

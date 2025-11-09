@@ -23,3 +23,24 @@ CREATE TABLE IF NOT EXISTS `user` (
 INSERT INTO `user` (`username`, `password`, `email`, `nickname`, `status`) 
 VALUES ('admin', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'admin@example.com', '管理员', 1);
 
+-- 笔记表
+CREATE TABLE IF NOT EXISTS `note` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '笔记ID',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+    `title` VARCHAR(200) NOT NULL COMMENT '笔记标题',
+    `content` TEXT NOT NULL COMMENT '笔记内容',
+    `status` TINYINT DEFAULT 1 COMMENT '状态：0-草稿，1-发布，2-私密',
+    `view_count` INT DEFAULT 0 COMMENT '浏览次数',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='笔记表';
+
+-- 插入测试笔记
+INSERT INTO `note` (`user_id`, `title`, `content`, `status`) VALUES
+(1, '我的第一篇笔记', '这是一篇测试笔记，欢迎使用Vblog笔记系统！', 1),
+(1, 'Spring Boot学习笔记', 'Spring Boot是一个优秀的Java框架，可以快速搭建应用...', 1),
+(1, '私密笔记', '这是一篇私密笔记，只有作者可以看到。', 2);
