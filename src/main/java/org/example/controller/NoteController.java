@@ -72,8 +72,8 @@ public class NoteController {
     @PutMapping("/{id}")
     @RequireAuth
     public Result<Note> updateNote(@PathVariable Long id, 
-                                   @RequestBody NoteRequest request,
-                                   HttpServletRequest httpRequest) {
+                               @RequestBody NoteRequest request,
+                               HttpServletRequest httpRequest) {
         try {
             Long userId = tokenHelper.getUidFromRequest(httpRequest);
             
