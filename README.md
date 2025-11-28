@@ -1,10 +1,11 @@
 # Vblog - 个人笔记系统
 
-基于 Spring Boot + MyBatis + JWT 的个人笔记系统后端。
+基于 Spring Boot + Vue 3 的全栈个人笔记系统。
 
 ## 技术栈
 
-- **后端框架**: Spring Boot 3.2.0
+### 后端
+- **框架**: Spring Boot 3.2.0
 - **持久层**: MyBatis 3.0.3
 - **数据库**: MySQL 8.0
 - **缓存**: Redis (用于 Token 管理)
@@ -12,6 +13,13 @@
 - **密码加密**: SHA-256
 - **构建工具**: Maven
 - **容器化**: Docker & Docker Compose
+
+### 前端
+- **框架**: Vue 3.5.22
+- **构建工具**: Vite 7.1.11
+- **路由**: Vue Router 4.6.3
+- **状态管理**: Pinia 3.0.3
+- **HTTP 客户端**: Axios 1.13.2
 
 ## 核心功能
 
@@ -43,7 +51,7 @@
 Vblog/
 ├── sql/                          # 数据库初始化脚本
 │   └── init.sql
-├── src/main/
+├── src/main/                     # 后端源码
 │   ├── java/org/example/
 │   │   ├── VblogApplication.java          # 主应用类
 │   │   ├── annotation/                    # 自定义注解
@@ -56,32 +64,29 @@ Vblog/
 │   │   │   └── WebConfig.java            # Web 配置（拦截器、CORS）
 │   │   ├── controller/                    # 控制器
 │   │   │   ├── UserController.java       # 用户相关接口
+│   │   │   ├── NoteController.java       # 笔记相关接口
 │   │   │   └── TestController.java       # 测试接口
 │   │   ├── dto/                           # 数据传输对象
-│   │   │   ├── LoginRequest.java
-│   │   │   ├── LoginResponse.java
-│   │   │   ├── RegisterRequest.java
-│   │   │   └── ChangePasswordRequest.java
 │   │   ├── entity/                        # 实体类
-│   │   │   └── User.java
 │   │   ├── interceptor/                   # 拦截器
-│   │   │   └── JwtInterceptor.java       # JWT 拦截器
 │   │   ├── mapper/                        # MyBatis Mapper
-│   │   │   └── UserMapper.java
 │   │   ├── service/                       # 服务层
-│   │   │   ├── UserService.java          # 用户服务
-│   │   │   └── TokenService.java         # Token 管理服务
 │   │   └── util/                          # 工具类
-│   │       ├── JwtUtil.java               # JWT 工具类
-│   │       └── PasswordUtil.java          # 密码加密工具
 │   └── resources/
 │       ├── application.properties         # 应用配置
 │       ├── mapper/                        # MyBatis XML
-│       │   └── UserMapper.xml
 │       └── static/                        # 静态资源
-│           ├── login-test.html           # 登录测试页面
-│           ├── jwt-test.html             # JWT 测试页面
-│           └── test.html                 # 基础测试页面
+├── vue-vblog/                    # 前端项目（Vue 3 + Vite）
+│   ├── src/
+│   │   ├── api/                           # API 请求封装
+│   │   ├── components/                    # Vue 组件
+│   │   ├── router/                        # 路由配置
+│   │   ├── store/                         # Pinia 状态管理
+│   │   ├── views/                         # 页面视图
+│   │   ├── App.vue                        # 根组件
+│   │   └── main.js                        # 入口文件
+│   ├── package.json                       # 前端依赖配置
+│   └── vite.config.js                     # Vite 配置
 ├── docker-compose.yaml                    # Docker 编排文件
 ├── pom.xml                               # Maven 配置
 ├── API文档.md                            # API 接口文档
@@ -93,9 +98,13 @@ Vblog/
 
 ### 1. 环境要求
 
-- Java 21
-- Maven 3.6+
-- Docker & Docker Compose
+- **后端**:
+  - Java 21
+  - Maven 3.6+
+  - Docker & Docker Compose
+- **前端**:
+  - Node.js 20.19.0+ 或 22.12.0+
+  - npm 或 yarn
 
 ### 2. 启动数据库
 
@@ -108,19 +117,46 @@ docker-compose up -d
 - MySQL 8.0 (端口: 10000)
 - Redis (端口: 6379)
 
-### 3. 启动应用
+等待数据库初始化完成（约10-30秒），可以通过以下命令检查：
 
 ```bash
+docker logs my-mysql
+```
+
+### 3. 启动后端应用
+
+```bash
+# 在项目根目录
 mvn spring-boot:run
 ```
 
-应用将在 `http://localhost:8080` 启动。
+后端应用将在 `http://localhost:8080` 启动。
 
-### 4. 测试页面
+### 4. 启动前端应用
 
-- **基础测试**: http://localhost:8080/test.html
-- **登录测试**: http://localhost:8080/login-test.html
-- **JWT 测试**: http://localhost:8080/jwt-test.html
+打开新的终端窗口，执行：
+
+```bash
+# 进入前端目录
+cd /home/rachel/Desktop/Vblog/vue-vblog
+
+# 安装依赖（首次运行需要）
+npm install
+
+# 启动开发服务器
+npm run dev
+```
+
+前端应用将在 `http://localhost:5173` 启动（Vite 默认端口）。
+
+### 5. 访问应用
+
+- **前端界面**: http://localhost:5173
+- **后端 API**: http://localhost:8080
+- **后端测试页面**:
+  - 基础测试: http://localhost:8080/test.html
+  - 登录测试: http://localhost:8080/login-test.html
+  - JWT 测试: http://localhost:8080/jwt-test.html
 
 ## API 接口
 

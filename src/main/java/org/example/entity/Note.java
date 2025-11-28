@@ -8,6 +8,10 @@ import java.time.LocalDateTime;
 public class Note {
     private Long id;
     private Long userId;           // 用户ID
+    /**
+     * 用户名（从 user 表关联查询时填充）
+     */
+    private String username;
     private String title;          // 笔记标题
     private String content;        // 笔记内容
     private Integer status;        // 状态：0-草稿，1-发布，2-私密
@@ -32,6 +36,14 @@ public class Note {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getTitle() {
@@ -87,6 +99,7 @@ public class Note {
         return "Note{" +
                 "id=" + id +
                 ", userId=" + userId +
+                ", username='" + username + '\'' +
                 ", title='" + title + '\'' +
                 ", status=" + status +
                 ", viewCount=" + viewCount +

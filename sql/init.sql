@@ -39,6 +39,20 @@ CREATE TABLE IF NOT EXISTS `note` (
     KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='笔记表';
 
+-- 图片资源表
+CREATE TABLE IF NOT EXISTS `image` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '图片ID',
+    `user_id` BIGINT NOT NULL COMMENT '上传用户ID',
+    `url` VARCHAR(255) NOT NULL COMMENT '访问URL（/uploads/xxx）',
+    `path` VARCHAR(500) NOT NULL COMMENT '服务器存储路径',
+    `size` BIGINT DEFAULT 0 COMMENT '文件大小（字节）',
+    `content_type` VARCHAR(100) DEFAULT NULL COMMENT 'MIME 类型',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_image_user_id` (`user_id`),
+    KEY `idx_image_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='图片资源表';
+
 -- 插入测试笔记
 INSERT INTO `note` (`user_id`, `title`, `content`, `status`) VALUES
 (1, '我的第一篇笔记', '这是一篇测试笔记，欢迎使用Vblog笔记系统！', 1),

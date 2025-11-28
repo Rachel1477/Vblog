@@ -6,6 +6,7 @@
     <resultMap id="BaseResultMap" type="org.example.entity.Note">
         <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
         <result column="title" property="title"/>
         <result column="content" property="content"/>
         <result column="status" property="status"/>
@@ -15,7 +16,15 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, user_id, title, content, status, view_count, create_time, update_time
+        n.id,
+        n.user_id,
+        u.username,
+        n.title,
+        n.content,
+        n.status,
+        n.view_count,
+        n.create_time,
+        n.update_time
     </sql>
 
     <!-- 插入笔记 -->
@@ -24,12 +33,13 @@
         VALUES (#{userId}, #{title}, #{content}, #{status}, 0)
     </insert>
 
-    <!-- 根据ID查询笔记 -->
+    <!-- 根据ID查询笔记（同时查询作者用户名） -->
     <select id="findById" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM note
-        WHERE id = #{id}
+        FROM note n
+        LEFT JOIN user u ON n.user_id = u.id
+        WHERE n.id = #{id}
     </select>
 
     <!-- 更新笔记 -->
@@ -46,22 +56,24 @@
         DELETE FROM note WHERE id = #{id}
     </delete>
 
-    <!-- 查询用户的所有笔记 -->
+    <!-- 查询用户的所有笔记（同时查询作者用户名） -->
     <select id="findByUserId" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM note
-        WHERE user_id = #{userId}
-        ORDER BY create_time DESC
+        FROM note n
+        LEFT JOIN user u ON n.user_id = u.id
+        WHERE n.user_id = #{userId}
+        ORDER BY n.create_time DESC
     </select>
 
-    <!-- 查询所有公开的笔记 -->
+    <!-- 查询所有公开的笔记（同时查询作者用户名） -->
     <select id="findPublicNotes" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM note
-        WHERE status = 1
-        ORDER BY create_time DESC
+        FROM note n
+        LEFT JOIN user u ON n.user_id = u.id
+        WHERE n.status = 1
+        ORDER BY n.create_time DESC
     </select>
 
     <!-- 统计用户笔记数量 -->
