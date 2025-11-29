@@ -1,49 +1,3 @@
-<template>
-  <div class="container" :class="{ 'right-panel-active': isLoginActive }">
-
-
-    <!-- 注册表单 -->
-    <div class="form-container sign-in-container">
-      <form @submit.prevent="handleRegister">
-        <h1>创建账号</h1>
-        <input v-model="regUsername" placeholder="用户名" />
-        <input v-model="regPassword" type="password" placeholder="密码" />
-        <button type="submit">SIGN UP</button>
-      </form>
-    </div>
-
-    <!-- 登录表单 -->
-    <div class="form-container sign-up-container">
-      <form @submit.prevent="handleLogin">
-        <h1>登入账号</h1>
-        <input v-model="loginUsername" placeholder="用户名" />
-        <input v-model="loginPassword" type="password" placeholder="密码" />
-        <button type="submit">SIGN IN</button>
-      </form>
-    </div>
-
-    
-
-    <!-- 左右滑动 Panel -->
-    <div class="overlay-container">
-      <div class="overlay">
-        <div class="overlay-panel overlay-left">
-          <h1>Welcome Back！</h1>
-          <p>没有账号？去注册一个账号！</p>
-          <button class="ghost" @click="toggleForm ">SIGN UP</button>
-        </div>
-
-        <div class="overlay-panel overlay-right">
-          <h1>Hello Friend!</h1>
-          <p>已经有账号？去登录账号来进入奇妙世界吧！</p>
-          <button class="ghost" @click="toggleForm ">SIGN IN</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</template>
-
 <script setup>
 import { ref } from 'vue'
 import { login, register } from '@/api/user'
@@ -82,7 +36,7 @@ const handleLogin = async () => {
       const { token, user } = res.data.data
       userStore.setToken(token)
       userStore.setUser(user)
-      router.push('/notes')
+      router.push('/public')
     } else {
       alert("登录失败：" + res.data?.message)
     }
@@ -105,6 +59,8 @@ const handleRegister = async () => {
     if (res.data?.code !== 200) {
       alert("注册失败：" + res.data?.message)
       return
+    }else{
+      alert("注册成功")
     }
 
     loginUsername.value = regUsername.value;
@@ -116,13 +72,95 @@ const handleRegister = async () => {
 </script>
 
 
+
+
+<template>
+  <div class="authPage">
+    <video class="bg-video" autoplay muted loop>
+      <source src="@/assets/Background.mp4" type="video/mp4" />
+    </video>
+    <div class="container" :class="{ 'right-panel-active': isLoginActive }">
+
+
+      <!-- 注册表单 -->
+      <div class="form-container sign-in-container" >
+        <form @submit.prevent="handleRegister">
+          <h1>创建账号</h1>
+          <input v-model="regUsername" placeholder="用户名" />
+          <input v-model="regPassword" type="password" placeholder="密码" />
+          <button type="submit" class="btn-animated">SIGN UP</button>
+        </form>
+      </div>
+
+      <!-- 登录表单 -->
+      <div class="form-container sign-up-container" >
+        <form @submit.prevent="handleLogin">
+          <h1>登入账号</h1>
+          <input v-model="loginUsername" placeholder="用户名" />
+          <input v-model="loginPassword" type="password" placeholder="密码" />
+          <button type="submit" class="btn-animated">SIGN IN</button>
+        </form>
+    </div>
+
+    
+
+    <!-- 左右滑动 Panel -->
+    <div class="overlay-container">
+      <div class="overlay">
+        <div class="overlay-panel overlay-left">
+          <h1>Welcome Back！</h1>
+          <p>没有账号？去注册一个账号！</p>
+          <button class="ghost btn-animated" @click="toggleForm ">SIGN UP</button>
+        </div>
+
+        <div class="overlay-panel overlay-right">
+          <h1>Hello Friend!</h1>
+          <p>已经有账号？去登录账号来进入奇妙世界吧！</p>
+          <button class="ghost btn-animated" @click="toggleForm ">SIGN IN</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  </div>
+</template>
+
+
+
 <style scoped>
 * {
   box-sizing: border-box;
 }
 
+.bg-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 1;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 将除导航外的页面主体居中显示（顶部留出导航高度） */
+.authPage {
+  display: flex;
+  align-items: center; /* 垂直居中 */
+  justify-content: center; /* 水平居中 */
+  min-height: calc(100vh - var(--nav-height)); /* 减去导航高度的可视高度 */
+  padding: 20px; /* 小屏幕留白 */
+  position: relative;
+  z-index: 1;
+}
+
+.authPage .container {
+  margin: 0; /* 覆盖原有 40px 外边距，方便精确居中 */
+}
+
 .container {
-  background: #eef2f7;
+  background: rgba(255, 255, 255, 0.5);
   box-shadow: 0 10px 30px #d4dce6;
   border-radius: 20px;
   position: relative;
@@ -135,6 +173,8 @@ const handleRegister = async () => {
 
 /* Panel 基础 */
 .form-container {
+  background-color: rgb(138, 34, 36);
+  color:#fff;
   position: absolute;
   top: 0;
   height: 100%;
@@ -145,7 +185,7 @@ const handleRegister = async () => {
 }
 
 form {
-  background: #eef3f9;
+  
   display: flex;
   flex-direction: column;
   padding: 0 50px;
@@ -166,7 +206,7 @@ form input {
 form button {
   margin-top: 20px;
   padding: 12px;
-  background: #4b70e2;
+  background: #f604046e;
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -202,7 +242,8 @@ form button {
 
 /* overlay 内容整体 */
 .overlay {
-  background: #4b70e2;
+  background: #c423336e;
+  background-repeat: no-repeat;
   color: #fff;
   position: relative;
   left: -100%;
@@ -238,6 +279,7 @@ form button {
 /* 按钮 */
 .ghost {
   background: rgba(255, 255, 255, 0.2);
+  color: #fff;
   border: 1px solid #fff;
   padding: 10px 30px;
   border-radius: 20px;

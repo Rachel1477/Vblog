@@ -39,3 +39,8 @@ export function deleteNote(id) {
     return request.delete(`/api/note/${id}`)
 }
 
+// 8️⃣ 统计用户笔记数量（游客可访问）
+export function getNoteCountByUserId(userId) {
+    return request.get(`/api/note/count/${userId}`)
+}
+
