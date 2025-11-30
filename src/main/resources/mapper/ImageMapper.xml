@@ -3,10 +3,57 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.example.mapper.ImageMapper">
 
+    <resultMap id="BaseResultMap" type="org.example.entity.Image">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="url" property="url"/>
+        <result column="path" property="path"/>
+        <result column="size" property="size"/>
+        <result column="content_type" property="contentType"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <!-- 插入文件记录 -->
     <insert id="insert" parameterType="org.example.entity.Image" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO image (user_id, url, path, size, content_type)
         VALUES (#{userId}, #{url}, #{path}, #{size}, #{contentType})
     </insert>
+
+    <!-- 根据ID查询文件 -->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT id, user_id, url, path, size, content_type, create_time
+        FROM image
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据用户ID查询文件列表 -->
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT id, user_id, url, path, size, content_type, create_time
+        FROM image
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据用户ID和文件类型查询文件列表 -->
+    <select id="findByUserIdAndType" resultMap="BaseResultMap">
+        SELECT id, user_id, url, path, size, content_type, create_time
+        FROM image
+        WHERE user_id = #{userId}
+        <if test="contentType != null and contentType != ''">
+            AND content_type LIKE CONCAT(#{contentType}, '%')
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 删除文件记录 -->
+    <delete id="deleteById">
+        DELETE FROM image WHERE id = #{id}
+    </delete>
+
+    <!-- 统计用户文件数量 -->
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM image WHERE user_id = #{userId}
+    </select>
 
 </mapper>
 

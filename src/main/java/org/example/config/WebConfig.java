@@ -41,7 +41,16 @@ public class WebConfig implements WebMvcConfigurer {
                         "/**/*.png",
                         "/**/*.jpg",
                         "/**/*.jpeg",
-                        "/**/*.gif"
+                        "/**/*.gif",
+                        "/**/*.webp",
+                        "/**/*.bmp",
+                        "/**/*.mp4",
+                        "/**/*.avi",
+                        "/**/*.mov",
+                        "/**/*.wmv",
+                        "/**/*.flv",
+                        "/**/*.webm",
+                        "/uploads/**"
                 );
     }
 
@@ -74,8 +83,11 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     /**
-     * 配置静态资源映射，用于访问上传的图片
-     * 访问路径示例：/uploads/images/xxx.png
+     * 配置静态资源映射，用于访问上传的文件（图片、视频、通用文件）
+     * 访问路径示例：
+     * - /uploads/images/xxx.png
+     * - /uploads/videos/xxx.mp4
+     * - /uploads/files/xxx.pdf
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

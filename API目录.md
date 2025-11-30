@@ -51,6 +51,39 @@
 
 ---
 
+## 📤 文件上传下载 API (`/api/upload`)
+
+### 文件上传
+
+| 方法 | 路径 | 描述 | 权限 |
+|------|------|------|------|
+| POST | `/api/upload/image` | 上传图片（JPEG, PNG, GIF, WEBP, BMP） | 需要认证 |
+| POST | `/api/upload/video` | 上传视频（MP4, AVI, MOV, WMV, FLV, WEBM） | 需要认证 |
+| POST | `/api/upload/file` | 上传通用文件（所有类型） | 需要认证 |
+
+### 文件下载与管理
+
+| 方法 | 路径 | 描述 | 权限 |
+|------|------|------|------|
+| GET | `/api/upload/download/{id}` | 下载文件（带权限验证） | 需要认证 |
+| GET | `/api/upload/{id}` | 获取文件信息 | 需要认证（只能查看自己的） |
+| DELETE | `/api/upload/{id}` | 删除文件 | 需要认证（只能删除自己的） |
+
+### 文件列表
+
+| 方法 | 路径 | 描述 | 权限 |
+|------|------|------|------|
+| GET | `/api/upload/my` | 获取我的所有文件列表 | 需要认证 |
+| GET | `/api/upload/my/type` | 根据文件类型获取我的文件列表 | 需要认证 |
+| GET | `/api/upload/my/count` | 统计我的文件数量 | 需要认证 |
+
+**注意**：
+- 所有上传文件最大大小限制：50MB
+- 上传的文件可以通过静态资源路径直接访问：`/uploads/images/xxx.png`、`/uploads/videos/xxx.mp4`、`/uploads/files/xxx.pdf`
+- 下载接口提供带权限验证的文件下载，确保用户只能下载自己的文件
+
+---
+
 ## 📅 计划 API (`/api/plan`)
 
 ### 计划管理
@@ -281,6 +314,95 @@ curl http://localhost:8080/api/plan/my/count \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
+### 13. 上传图片
+
+```bash
+curl -X POST http://localhost:8080/api/upload/image \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "file=@/path/to/image.jpg"
+```
+
+响应：
+```json
+{
+    "code": 200,
+    "message": "图片上传成功",
+    "data": {
+        "id": 1,
+        "userId": 1,
+        "url": "/uploads/images/abc123def456.jpg",
+        "path": "/home/user/project/uploads/images/abc123def456.jpg",
+        "size": 102400,
+        "contentType": "image/jpeg",
+        "createTime": "2025-11-16T15:30:00"
+    }
+}
+```
+
+### 14. 上传视频
+
+```bash
+curl -X POST http://localhost:8080/api/upload/video \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "file=@/path/to/video.mp4"
+```
+
+### 15. 上传通用文件
+
+```bash
+curl -X POST http://localhost:8080/api/upload/file \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "file=@/path/to/document.pdf"
+```
+
+### 16. 下载文件
+
+```bash
+curl -X GET http://localhost:8080/api/upload/download/1 \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -o downloaded_file.jpg
+```
+
+### 17. 获取文件信息
+
+```bash
+curl http://localhost:8080/api/upload/1 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### 18. 获取我的所有文件列表
+
+```bash
+curl http://localhost:8080/api/upload/my \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### 19. 根据类型获取我的文件列表
+
+```bash
+# 获取所有图片
+curl "http://localhost:8080/api/upload/my/type?type=image" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# 获取所有视频
+curl "http://localhost:8080/api/upload/my/type?type=video" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### 20. 删除文件
+
+```bash
+curl -X DELETE http://localhost:8080/api/upload/1 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### 21. 统计我的文件数量
+
+```bash
+curl http://localhost:8080/api/upload/my/count \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
 ---
 
 ## 📂 API 文件位置
@@ -304,8 +426,12 @@ curl http://localhost:8080/api/plan/my/count \
 
 ## 🔄 更新日志
 
-### 2025-11-16
-- ✅ 添加计划CRUD API（创建、查询、更新、删除）
+### 2025-12-01
+-  添加文件上传下载API（图片、视频、通用文件）
+-  添加文件管理API（查询、删除、统计）
+-  添加文件下载接口（带权限验证）
+-  扩展ImageService支持多种文件类型
+-  添加计划CRUD API（创建、查询、更新、删除）
 - ✅ 添加计划列表API（我的计划、按日期范围查询）
 - ✅ 添加计划统计API（统计计划数量）
 - ✅ 计划功能支持日历时间选择
@@ -359,7 +485,129 @@ curl http://localhost:8080/api/plan/my/count \
 
 ---
 
+## 📁 文件上传下载功能说明
+
+### 支持的文件类型
+
+#### 图片格式
+- JPEG/JPG
+- PNG
+- GIF
+- WEBP
+- BMP
+
+#### 视频格式
+- MP4
+- AVI
+- MOV
+- WMV
+- FLV
+- WEBM
+
+#### 通用文件
+- 支持所有文件类型（通过 `/api/upload/file` 接口）
+
+### 文件大小限制
+- 所有文件最大大小：**50MB**
+
+### 文件存储路径
+- 图片：`/uploads/images/`
+- 视频：`/uploads/videos/`
+- 通用文件：`/uploads/files/`
+
+### 文件访问方式
+
+#### 1. 直接访问（静态资源）
+上传成功后，可以通过返回的 `url` 字段直接访问：
+```
+http://localhost:8080/uploads/images/abc123def456.jpg
+http://localhost:8080/uploads/videos/xyz789.mp4
+```
+
+#### 2. 下载接口（带权限验证）
+使用下载接口可以确保只有文件所有者才能下载：
+```
+GET /api/upload/download/{id}
+```
+
+### 请求示例
+
+#### 上传图片（使用curl）
+```bash
+curl -X POST http://localhost:8080/api/upload/image \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "file=@/path/to/image.jpg"
+```
+
+#### 上传文件（使用JavaScript/Fetch）
+```javascript
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+fetch('http://localhost:8080/api/upload/image', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN'
+  },
+  body: formData
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+
+#### 上传文件（使用axios）
+```javascript
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+axios.post('http://localhost:8080/api/upload/image', formData, {
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN',
+    'Content-Type': 'multipart/form-data'
+  }
+})
+.then(response => console.log(response.data));
+```
+
+### 响应格式
+
+#### 上传成功响应
+```json
+{
+    "code": 200,
+    "message": "图片上传成功",
+    "data": {
+        "id": 1,
+        "userId": 1,
+        "url": "/uploads/images/abc123def456.jpg",
+        "path": "/home/user/project/uploads/images/abc123def456.jpg",
+        "size": 102400,
+        "contentType": "image/jpeg",
+        "createTime": "2025-11-16T15:30:00"
+    }
+}
+```
+
+#### 错误响应
+```json
+{
+    "code": 500,
+    "message": "不支持的文件类型：application/pdf",
+    "data": null
+}
+```
+
+### 文件管理
+
+- **查看文件信息**：`GET /api/upload/{id}`
+- **获取文件列表**：`GET /api/upload/my`
+- **按类型筛选**：`GET /api/upload/my/type?type=image`
+- **删除文件**：`DELETE /api/upload/{id}`（会同时删除物理文件和数据库记录）
+- **统计文件数量**：`GET /api/upload/my/count`
+
+---
+
 **最后更新**: 2025-11-16  
-**API版本**: v1.1  
+**API版本**: v1.2  
 **文档状态**: ✅ 完整
 
