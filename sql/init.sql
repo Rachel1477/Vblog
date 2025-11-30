@@ -58,3 +58,20 @@ INSERT INTO `note` (`user_id`, `title`, `content`, `status`) VALUES
 (1, '我的第一篇笔记', '这是一篇测试笔记，欢迎使用Vblog笔记系统！', 1),
 (1, 'Spring Boot学习笔记', 'Spring Boot是一个优秀的Java框架，可以快速搭建应用...', 1),
 (1, '私密笔记', '这是一篇私密笔记，只有作者可以看到。', 2);
+
+-- 计划表
+CREATE TABLE IF NOT EXISTS `plan` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '计划ID',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+    `title` VARCHAR(200) NOT NULL COMMENT '计划标题',
+    `content` TEXT DEFAULT NULL COMMENT '计划内容',
+    `plan_time` DATETIME NOT NULL COMMENT '计划时间',
+    `status` TINYINT DEFAULT 0 COMMENT '状态：0-未完成，1-已完成，2-已取消',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_plan_user_id` (`user_id`),
+    KEY `idx_plan_time` (`plan_time`),
+    KEY `idx_plan_status` (`status`),
+    KEY `idx_plan_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='计划表';
